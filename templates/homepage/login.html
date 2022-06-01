@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Animated Login Form</title>
+	<link rel="stylesheet" type="text/css" href="/static/css/login.css">
+	<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+	<script src="https://kit.fontawesome.com/a81368914c.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+	<a href="{{url_for('inicio')}}" class="logo">
+		<img src="https://img.icons8.com/external-victoruler-flat-gradient-victoruler/64/undefined/external-restaurant-food-and-delivery-victoruler-flat-gradient-victoruler.png" style="transform: translate(-2px, 2px);"/>
+	</a>
+	<img class="wave" src="/static/resources/wave.png">
+	<div class="container">
+		<div class="img">
+			<img src="/static/resources/bg.svg">
+		</div>
+		<div class="login-content">
+			<form action="{{url_for('entrar')}}" method="post">
+				<img src="/static/resources/avatar.svg">
+				<h2 class="title">Welcome</h2>
+           		<div class="input-div one">
+           		   <div class="i">
+           		   		<i class="fas fa-user"></i>
+           		   </div>
+           		   <div class="div">
+           		   		<h5>Username</h5>
+           		   		<input type="text" class="input" id = "email" name="email">
+           		   </div>
+           		</div>
+           		<div class="input-div pass">
+           		   <div class="i"> 
+           		    	<i class="fas fa-lock"></i>
+           		   </div>
+           		   <div class="div">
+           		    	<h5>Password</h5>
+           		    	<input type="password" class="input" id="password" name="password">
+            	   </div>
+            	</div>
+            	<a href="{{url_for('rec_contra')}}">Forgot Password?</a>
+            	<input type="submit" class="btn" value="Login">
+				{% with messages = get_flashed_messages(category_filter=['success']) %}
+                {% if messages %}
+                <div class="alert" role="alert" style="text-align: center; padding: 0.5rem 2rem ;color: green; font-size: 14px; color: rgba(0, 255, 81, 0.537)">
+                  {% for message in messages %}
+                      {{ message }}
+                  {% endfor %}
+                  </div>
+                {% endif %}
+                {% endwith %}
+              {% with messages = get_flashed_messages(category_filter=['error']) %}
+                {% if messages %}
+                  <div class="alert" role="alert" style="text-align: center; padding: 0.5rem 2rem ;color: red; font-size: 14px; color: rgba(255, 0, 0, 0.537)">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                    </div>
+                {% endif %}
+              {% endwith %}
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript" src="/static/js/main.js"></script>
+</body>
+</html>

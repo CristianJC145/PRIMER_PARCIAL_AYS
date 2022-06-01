@@ -1,118 +1,73 @@
 from __future__ import print_function
 from flask import Flask, render_template, request, redirect, url_for, session,flash
-from flask_mysqldb import MySQL,MySQLdb
 from smtplib import SMTP
 from email.message import EmailMessage
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
-import bcrypt
-import re
 import hashlib 
-from hashlib import sha256
-
-#a=URLSafeTimedSerializer('Thisisasecret')
+from models import cartaModels
+from controllers import enviarCorreo
+a=URLSafeTimedSerializer('Thisisasecret')
 app = Flask(__name__)
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'baselogin'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-mysql = MySQL(app)
 
 @app.route('/')
 def inicio():
-    return render_template("inicio.html")
+    return render_template("index.html")
 
 @app.route('/entrar',methods=["GET","POST"])
 def entrar():
     if request.method == 'GET':
-        return render_template("entrada.html")
-    else:
-        email = request.form.get('email')
-        password = request.form.get('password')
-        #print(email,password)
-        password = hashlib.sha1(password.encode()).hexdigest()
-        #print(email,password)
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM users WHERE email = %s and password=%s and estado='1'", (
-            email,
-            password,
-            ))
-        usuario = cur.fetchone()
-        cur.close()
+        return render_template("/homepage/login.html")
 
-        if usuario:
-            if password == usuario["password"]:
-                session['email']=usuario['email']
-                session['password']=usuario['password']
-                session['name']=usuario['name']
-                return render_template('index_producto.html')
-                #return redirect(url_for('inicio'))  
-                
-            else:
-                flash("correo o contraeña incorrectos")
-                #return render_template("usuario o contraseña incorrectos")
-                print("no entro el usuario")
-        else:
-            print("usuario no encontrado")
-            flash("alguno de los campos son incorretos")
+    email = request.form.get('email')
+    password = request.form.get('password')
+    password = hashlib.sha1(password.encode('utf8')).hexdigest()
+    usuario = cartaModels.usuario(email, password)
 
-    return render_template("entrada.html") 
-        
-@app.route('/nu_contra', methods=["GET", "POST"])
-def nu_contra():
+    if usuario is None:
+        flash("correo o contraseña incorrectos", 'error')
+        return redirect(request.url)
+
+    session['user'] = usuario
+    
+    return redirect(url_for('index_producto.html'))
+
+   
+@app.route('/nu_contra/<token>', methods=["GET", "POST"])
+def nu_contra(token):
+    email = a.loads(token, salt='recuperarp')
+    return email
     return render_template("nu_contra.html")
 
 
 @app.route('/recuperarp', methods=["GET", "POST"])
 def rec_contra():
-        if request.method =='GET':
-            return render_template('rec_contra.html')
-        else:
-            email = request.form.get('email_form')
+    if request.method =='GET':
+        return render_template('rec_contra.html')
 
-            cur = mysql.connection.cursor()
-            cursor.execute("SELECT * FROM usuarios WHERE correo = %s and estado='1'", (
-                correo,
-                ))
-            usuario = cur.fetchone()
-            cur.close()
+    email = request.form.get('email_form')
+    usuario = cartaModels.consultarCorreo(email)
+    if usuario is None:
+            flash('correo invalido')
+            print("no entro")
+            return redirect(request.url)
 
-            if not(usuario):
-                flash('correo invalido')
-                print("no entro")
-                return render_template('rec_contra.html')
+    if email =='':
+            flash('Ingrese el correo')
 
-            is_valid = True
+    token = a.dumps(email, salt='recuperarp')
+    link = url_for('recuperarpLink', token=token, _external=True)
+    enviarCorreo.recuperarContrasenia(email,link)
+    flash("REVISA TU CORREO", 'success')   
+    return render_template('/homepage/login.html')
 
-            if correo =='':
-                flash('Ingrese el correo')
-                print("entro")
-                is_valid = False
-
-            if is_valid == False:
-                return render_template('rec_contra.html', email = email)
-
-            msg = EmailMessage()
-            msg.set_content('RESTABLECIMIENTO DE CONTRASEÑA',)
-
-            msg['Subject'] = 'confirmacion de cambio de usuario'
-            msg['From'] = "yeinerangulo2020@itp.edu.co"
-            msg['To'] = email
-
-            # Reemplaza estos valores con tus credenciales de Google Mail
-            username = 'yeinerangulo2020@itp.edu.co'
-            password = 'adrian16x'
-
-            server = SMTP('smtp.gmail.com:587')
-            server.starttls()
-            server.login(username, password)
-            server.send_message(msg)
-
-            server.quit()
-            flash("REVISA TU CORREO")
-            
-            return render_template('rec_contra.html')
-
+@app.route('/recuperarpLink/<token>', methods=['GET', 'POST'])
+def recuperarpLink(token):
+    try:
+        email = a.loads(token, salt='recuperarp')
+    except SignatureExpired:
+        flash("el token ya expiro")
+    link = url_for('nu_contra', token=token, _external=True)
+    return '<a href="{}">reestablece tu contraseña aqui</a>'.format(link)
 
 @app.route('/volver', methods=["GET", "POST"])
 def volver():
@@ -122,7 +77,7 @@ def volver():
 def cerrar():
     session.clear()
     return render_template("inicio.html")
-
+""" 
 @app.route('/registrar', methods=["GET", "POST"])
 def registrar():
     if request.method == 'GET':
@@ -365,7 +320,7 @@ def crea_prod():
 #         cur.close()
 #         return "<h1>EXPIRO EL TIEMPO VUELVA A INTERNTARLO</h1>"
 #     return "<h1>"+email+"  CONFIRMADO BIENVENIDO</h1>"
-
+""" 
 
 if __name__ == '__main__':
     app.secret_key = "kamata16angulo"
