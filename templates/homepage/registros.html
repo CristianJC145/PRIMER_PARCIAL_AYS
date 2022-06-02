@@ -1,56 +1,120 @@
-{% extends 'layouts/diseño.html' %}
-{% block title %} registrar {% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html>
 
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
+<head>
+    <title>Animated Login Form</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a81368914c.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <a href="{{url_for('inicio')}}" class="logo">
+        <img src="https://img.icons8.com/external-victoruler-flat-gradient-victoruler/64/undefined/external-restaurant-food-and-delivery-victoruler-flat-gradient-victoruler.png"
+            style="transform: translate(-2px, 2px);" />
+    </a>
+    <img class="wave" src="/static/resources/wave.png">
     <div class="container">
-        <div class="row">
-            <div class="col-md-6 col-md-offset-3">
-            <form action="/registrar" method="POST">
-            <div class="form-group">
-            <center><label>NOMBRE DEL USUARIO:</label></center>
-            <input type="text" class="form-control" name="name">
-            </div>
-            <div class="form-group">
-            <center><label>CORREO DEL USUARIO:</label></center>
-            <input type="email" class="form-control" name="email">
-            </div>
-            <div class="form-group">
-            <center><label>CONTRASEÑA:</label></center>
-            <input type="password" class="form-control" name="password">
-            </div>
-            <div class="form-group">
-            <center><label>IMAGEN DEL USUARIO:</label></center>
-            <input type="file" class="form-control" name="imagen">
-            </div>
-            <div class="form-group">
-            <center><label>CELULAR:</label></center>
-            <input type="text" class="form-control" name="celular">
-            </div>
-            <div class="form-group">
-            <center><label>DIRECCION:</label></center>
-            <input type="text" class="form-control" name="direccion">
-            </div>
-            <div class="form-group">
-            <center><label>DESCRIPCION:</label></center>
-            <input type="text" class="form-control" name="descripcion">
-            </div>
-            <div class="form-group">
-            <button type="submit" class="btn btn-success">REGISTARTE</button>
-            </div>
+        <div class="img">
+            <img src="/static/resources/bg.svg">
+        </div>
+        <div class="login-content">
+            <form action="{{url_for('entrar')}}" method="post">
+                <h2 class="title">REGISTRARSE</h2>
+                <div class="user-details">
+                    <div class="input-div one">
+                        <div class="i">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Username</h5>
+                            <input type="text" class="input" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="input-div one">
+                        <div class="i">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Email</h5>
+                            <input type="text" class="input" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="input-div one">
+                        <div class="i">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Phone</h5>
+                            <input type="text" class="input" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="input-div one">
+                        <div class="i">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Address</h5>
+                            <input type="text" class="input" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="input-div one">
+                        <div class="i">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Description</h5>
+                            <input type="text" class="input" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="input-div one">
+                        <div class="i">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Image</h5>
+                            <input type="text" class="input" id="email" name="email">
+                        </div>
+                    </div>
+                    <div class="input-div pass">
+                        <div class="i">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="div">
+                            <h5>Password</h5>
+                            <input type="password" class="input" id="password" name="password">
+                        </div>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <input type="submit" class="btn" value="Register">
+                    <a href="{{url_for('inicio')}}" class="btn-return"><span>Return</span></a>
+                </div>
+                {% with messages = get_flashed_messages(category_filter=['success']) %}
+                {% if messages %}
+                <div class="alert" role="alert"
+                    style="text-align: center; padding: 0.5rem 2rem ;color: green; font-size: 14px; color: rgba(0, 255, 81, 0.537)">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% with messages = get_flashed_messages(category_filter=['error']) %}
+                {% if messages %}
+                <div class="alert" role="alert"
+                    style="text-align: center; padding: 0.5rem 2rem ;color: red; font-size: 14px; color: rgba(255, 0, 0, 0.537)">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
             </form>
-            </div>
         </div>
     </div>
-{% endblock %}
+    <script type="text/javascript" src="/static/js/main.js"></script>
+</body>
 
-
-
+</html>

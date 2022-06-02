@@ -23,6 +23,15 @@
                             <input type="email" id="email_form" name="email_form">
                         </div>
                         <input type="submit" class="btn" value="Submit">
+                        {% with messages = get_flashed_messages(category_filter=['error']) %}
+                        {% if messages %}
+                          <div class="alert" role="alert" style="text-align: center; padding: 0.5rem 2rem ;color: red; font-size: 14px; color: rgba(255, 0, 0, 0.537)">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                      {% endwith %}
                     </form>
                 </div>
             </div>

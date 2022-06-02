@@ -5,7 +5,7 @@ from email.message import EmailMessage
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import hashlib 
 from models import cartaModels
-from controllers import enviarCorreo
+from controllers import enviarCorreo, validarContraseña
 a=URLSafeTimedSerializer('Thisisasecret')
 app = Flask(__name__)
 
@@ -28,16 +28,7 @@ def entrar():
         return redirect(request.url)
 
     session['user'] = usuario
-    
-    return redirect(url_for('index_producto.html'))
-
-   
-@app.route('/nu_contra/<token>', methods=["GET", "POST"])
-def nu_contra(token):
-    email = a.loads(token, salt='recuperarp')
-    return email
-    return render_template("nu_contra.html")
-
+    return redirect(url_for('mos_pro'))
 
 @app.route('/recuperarp', methods=["GET", "POST"])
 def rec_contra():
@@ -67,96 +58,109 @@ def recuperarpLink(token):
     except SignatureExpired:
         flash("el token ya expiro")
     link = url_for('nu_contra', token=token, _external=True)
-    return '<a href="{}">reestablece tu contraseña aqui</a>'.format(link)
+    return redirect(url_for('nu_contra', token=token)) 
 
-@app.route('/volver', methods=["GET", "POST"])
-def volver():
-    return render_template("inicio.html")
+@app.route('/nu_contra/<token>', methods=["GET", "POST"])
+def nu_contra(token):
+    if request.method == 'GET':
+        return render_template("nu_contra.html")
+    else:
+        email = a.loads(token, salt='recuperarp')
+        password = request.form.get('password')
+        passwordEncriptada = hashlib.sha1(password.encode()).hexdigest()
+        if (password == ""):
+            flash('La contrasenia no puede ir vacia', 'error')
+            return redirect(request.url)
+        if (not validarContraseña.main(password)):
+            flash('Esta contrasenia es invalida', 'error')
+            return redirect(request.url)
+        cartaModels.nuevaContrasenia(email,passwordEncriptada)
+        flash('Se ha restablecido correctamente su contraseña', 'success')
+        return redirect(url_for('entrar'))
+
 
 @app.route('/cerrar', methods=["GET", "POST"])
 def cerrar():
     session.clear()
     return render_template("inicio.html")
-""" 
+
 @app.route('/registrar', methods=["GET", "POST"])
 def registrar():
     if request.method == 'GET':
-        
-        return render_template("registros.html")
-    else:
+        return render_template("/homepage/registros.html")
 
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
-        password_encri = hashlib.sha256(password.encode()).hexdigest()
-        imagen = request.form['imagen']
-        celular = request.form['celular']
-        direccion = request.form['direccion']
-        descripcion = request.form['descripcion']
+    name = request.form['name']
+    email = request.form['email']
+    password = request.form['password']
+    password_encri = hashlib.sha256(password.encode()).hexdigest()
+    imagen = request.form['imagen']
+    celular = request.form['celular']
+    direccion = request.form['direccion']
+    descripcion = request.form['descripcion']
 
-        is_valid = True
+    is_valid = True
     
-        if name =="":
+    if name =="":
             flash("es requerido el nombre")
             is_valid= False
         
-        if email =="":
+    if email =="":
             flash("es requerido el email")
             is_valid= False
         
-        if password =="":
+    if password =="":
             flash("es requerido la contraseña")
             is_valid= False
     
-        if imagen =="":
+    if imagen =="":
             is_valid= False
 
-        if celular =="":
+    if celular =="":
             flash("es requerido el telefono")
             is_valid= False 
 
-        if direccion =="":
+    if direccion =="":
             flash("es requerido la direccion")
             is_valid= False  
         
-        if descripcion =="":
+    if descripcion =="":
             flash("es requerida la descripcion")
             is_valid= False
 
-        if is_valid == False:
+    if is_valid == False:
             print("los datos no son validos")
             return render_template("registros.html")
 
         
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO users (name, email, password, imagen, celular, direccion, descripcion) VALUES (%s,%s,%s,%s,%s,%s,%s)",(name,email,password_encri,imagen,celular,direccion,descripcion,))
+    cur = mysql.connection.cursor()
+    cur.execute("INSERT INTO users (name, email, password, imagen, celular, direccion, descripcion) VALUES (%s,%s,%s,%s,%s,%s,%s)",(name,email,password_encri,imagen,celular,direccion,descripcion,))
         
-        mysql.connection.commit()
-        session['name'] = request.form['name']
-        session['email'] = request.form['email']
+    mysql.connection.commit()
+    session['name'] = request.form['name']
+    session['email'] = request.form['email']
 
-        msg = EmailMessage()
-        msg.set_content('Señor usuario bienvenido',)
+    msg = EmailMessage()
+    msg.set_content('Señor usuario bienvenido',)
 
-        msg['Subject'] = 'confirmcion correo'
-        msg['From'] = "yeinerangulo2020@itp.edu.co"
-        msg['To'] = email
+    msg['Subject'] = 'confirmcion correo'
+    msg['From'] = "yeinerangulo2020@itp.edu.co"
+    msg['To'] = email
 
          # Reemplaza estos valores con tus credenciales de Google Mail
-        username = 'yeinerangulo2020@itp.edu.co'
-        password = '1193221281'
+    username = 'yeinerangulo2020@itp.edu.co'
+    password = '1193221281'
 
-        server = SMTP('smtp.gmail.com:587')
-        server.starttls()
-        server.login(username, password)
-        server.send_message(msg)
+    server = SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(username, password)
+    server.send_message(msg)
 
-        server.quit()
+    server.quit()
         
     return render_template("index_producto.html")
      
 
-
+""" 
 @app.get('/mos_pro')
 def mos_pro():
     cur=mysql.connection.cursor()

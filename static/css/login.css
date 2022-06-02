@@ -34,7 +34,7 @@ body{
     height: 100vh;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    grid-gap :7rem;
+    grid-gap :2rem;
     padding: 0 2rem;
 }
 
@@ -56,20 +56,28 @@ body{
 }
 
 form{
-	width: 360px;
+	width: 560px;
 }
 
 .login-content img{
     height: 100px;
 }
-
 .login-content h2{
 	margin: 15px 0;
 	color: #333;
 	text-transform: uppercase;
 	font-size: 2.9rem;
 }
-
+.user-details{
+	display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px 0 12px 0;
+}
+.user-details .input-div{
+	margin-bottom: 15px;
+    width: calc(100% / 2 - 20px);
+}
 .login-content .input-div{
 	position: relative;
     display: grid;
@@ -159,7 +167,7 @@ form{
 	margin-bottom: 4px;
 }
 
-a{
+.logo{
 	display: block;
 	text-align: right;
 	text-decoration: none;
@@ -168,13 +176,29 @@ a{
 	transition: .3s;
 }
 
-a:hover{
+.logo:hover{
 	color: #38d39f;
 }
-
+.buttons{
+	display: flex;
+	grid-gap: 2rem;
+}
+.buttons a{
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	border-radius: 25px;
+	width: 50%;
+	height: 50px;
+	background-image: linear-gradient(to right, #32be8f, #38d39f, #32be8f);
+	margin: 1rem 0;
+	color: #fff;
+	font-size: 1.2rem;
+	text-transform: uppercase;
+}
 .btn{
 	display: block;
-	width: 100%;
+	width: 50%;
 	height: 50px;
 	border-radius: 25px;
 	outline: none;
