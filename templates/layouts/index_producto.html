@@ -1,55 +1,42 @@
 <!DOCTYPE html>
 <html>
-    <head>
+
+<head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% block title %} {% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    </head>
-<body style="background-color: #00bf8f;">
-    <nav class="navbar navbar-default">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            </button>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-        <li>
-            <a href="/actu_usu">ACTU DATOS USUARIO</a>
-        </li>
-        <li>
-            <a href="/crea_prod">CREAR</a>
-        </li>
-        <li>
-            <a href="/mos_pro">MOSTRAR PRODUCTO</a>
-        </li>
-        <li>
-            <a href="/carrito">CARRITO PRODUCTO</a>
-        </li>
-        <li>
-            <a href="/cerrar">CERRAR_SESION</a>
-        </li>
-        </ul>
+    <link rel="stylesheet" type="text/css" media="screen"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/css/productos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+</head>
+
+<body>
+    <div class="table">
+        <div class="table_header">
+            <img src="{{(session['user'][4])}}" alt="">
+            <p>{{(session['user'][1])}}</p>
+            <div class="table_header-menu">
+                <span class="fas fa-home"></span>
+                <a href="{{ url_for('mos_pro')}}">Inicio</a>
+            </div>
+            <div class="table_header-menu">
+                <span class="fas fa-sliders-h"></span>
+                <a href="#">Configuracion</a>
+            </div>
+            <div class="table_header-menu">
+                <span class="fa fa-sign-out"></span>
+                <a href="{{ url_for('cerrar')}}">Cerrar Sesion</a>
+            </div>
+            
+            <div> <input placeholder="product" /> <a href="{{url_for('crea_prod')}}" class="add_new button"><span class="button">+ Añadir Producto</span></a> </div>
         </div>
     </div>
-    </nav>
-{% block content %} {% endblock %}
-    <br>
-    <br>
-    <center>
-        <img src="https://ichef.bbci.co.uk/news/640/cpsprodpb/F678/production/_106269036_gettyimages-991350808.jpg">
-    </center>
+    {% block content %} {% endblock %}
 
-    <footer class="bg-dark p-3 mt-5">
-        <p class="text-center m-0 text-muted">CARTA DE VIRTUAL SJA</p>
-      </footer>
- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
- </body>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+
 </html>
