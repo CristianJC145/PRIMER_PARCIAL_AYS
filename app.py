@@ -5,7 +5,7 @@ from email.message import EmailMessage
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 import hashlib 
 from models import cartaModels
-from controllers import enviarCorreo, validarContraseña
+from controllers import enviarCorreo, validarContraseña, nombrarImagen
 a=URLSafeTimedSerializer('Thisisasecret')
 app = Flask(__name__)
 
@@ -78,12 +78,6 @@ def nu_contra(token):
         flash('Se ha restablecido correctamente su contraseña', 'success')
         return redirect(url_for('entrar'))
 
-
-@app.route('/cerrar', methods=["GET", "POST"])
-def cerrar():
-    session.clear()
-    return render_template("inicio.html")
-
 @app.route('/registrar', methods=["GET", "POST"])
 def registrar():
     if request.method == 'GET':
@@ -130,67 +124,61 @@ def registrar():
     if is_valid == False:
             print("los datos no son validos")
             return render_template("registros.html")
-
-        
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO users (name, email, password, imagen, celular, direccion, descripcion) VALUES (%s,%s,%s,%s,%s,%s,%s)",(name,email,password_encri,imagen,celular,direccion,descripcion,))
-        
-    mysql.connection.commit()
-    session['name'] = request.form['name']
-    session['email'] = request.form['email']
-
-    msg = EmailMessage()
-    msg.set_content('Señor usuario bienvenido',)
-
-    msg['Subject'] = 'confirmcion correo'
-    msg['From'] = "yeinerangulo2020@itp.edu.co"
-    msg['To'] = email
-
-         # Reemplaza estos valores con tus credenciales de Google Mail
-    username = 'yeinerangulo2020@itp.edu.co'
-    password = '1193221281'
-
-    server = SMTP('smtp.gmail.com:587')
-    server.starttls()
-    server.login(username, password)
-    server.send_message(msg)
-
-    server.quit()
         
     return render_template("index_producto.html")
      
 
-""" 
+
 @app.get('/mos_pro')
 def mos_pro():
-    cur=mysql.connection.cursor()
-    cur.execute("select * from creacion_productos")
-    productos = cur.fetchall()
-    cur.close()
-        
-    return render_template('mos_prod.html',productos=productos)
+    id=str(session['user'][0])
+    productos = cartaModels.productos(id)
+    return render_template('/empresas/mos_prod.html',productos=productos)
 
-@app.route('/e_prod', methods=['GET','POST'])
-def editarprod():
-    
+@app.route('/cerrar') 
+def cerrar():
+    session.clear()
 
-    return render_template("editar_producto.html")
+    return redirect(url_for('entrar'))
 
-# @app.route('/actu_pro', methods=['GET','POST'])
-# def actuprod():
-#     cur=mysql.connection.cursor()
-#     ute(cur.exec"SELECT * FROM creacion_productos WHERE id = {0}".format(id==1))
-#     item=cur.fetchall()
-#     cur.close()
-#     return render_template('mos_prod.html')
+
+@app.route('/crea_prod', methods=['GET','POST'])
+def crea_prod():
+    if request.method == 'GET':
+        estado= cartaModels.estado()
+        return render_template("/empresas/crea_prod.html", estado = estado)
+
+    idEmpresa= str(session['user'][0])
+    name= request.form.get('name_pro')
+    estado = request.form.get('est_productos')
+    descripcion = request.form.get('des_producto')
+    precio = request.form.get('pre_productos')
+    imagen = request.files['img_producto']
+
+    try:
+        img =nombrarImagen.nombrarImagen(imagen)
+        cartaModels.creaProd(idEmpresa= idEmpresa, estado= estado, name=name,descripcion=descripcion,precio=precio,imagen= '/static/resources/productos/'+img)
+    except:
+        flash('Error al crear el producto', 'error')
+    imagen.save('./static/resources/productos/'+str(img))
+    flash('Producto creado con exito', 'success')
+
+    return redirect(url_for('mos_pro'))
 
 @app.route('/eliminarpro/<int:id>')
-def eliminarprod():
-    cur=mysql.connection.cursor()
-    cur.execute("DELETE from creacion_productos WHERE id={0}".format(id))
-    cur.close()
-    return render_template('mos_prod.html')
+def eliminarprod(id):
+    cartaModels.eliminarprod(id)
 
+    return redirect(url_for('mos_pro'))
+
+@app.route('/e_prod/<int:id>', methods=['GET','POST'])
+def editarprod(id):
+    if request.method == 'GET':
+        productos=cartaModels.edicionProducto(id)
+        estado= cartaModels.estado()
+        return render_template("/empresas/editar_producto.html", productos=productos, estado=estado)
+
+""" 
 @app.route('/carrito', methods=['GET','POST'])
 def carrito():
     return render_template('carrito.html')
@@ -270,60 +258,6 @@ def actual_usua():
         server.quit()
         
     return render_template('actua_infor.html')
-
-@app.route('/crea_prod', methods=['GET','POST'])
-def crea_prod():
-    if request.method == 'GET':
-        print("mostrando el formulario")
-        return render_template("crea_prod.html")
-    else:
-        print("no pasa el producto")
-        name = request.form.get('name_pro')
-        descripcion = request.form.get('des_producto')
-        precio = request.form.get('pre_productos')
-        imagen = request.form.get('img_producto')
-
-        is_valid = True
-    
-        if name =="":
-            flash("es requerido el nombre para el registro del producto")
-            is_valid= False
-        
-        if descripcion =="":
-            flash("es requerido la descripcion para el registro del producto")
-            is_valid= False
-        
-        if precio =="":
-            flash("es requerido el precio para el registro del producto")
-            is_valid= False
-    
-        if imagen =="":
-            is_valid= False
-
-        if is_valid == False:
-            print("los datos no son validos")
-            return render_template("crea_prod.html")
-
-        
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO creacion_productos (nombre, descripcion, precio, imagen) VALUES (%s,%s,%s,%s)",(name,descripcion,precio,imagen,))
-        mysql.connection.commit()
-
-    return render_template('mos_prod.html')
-
-# @app.route("/entrar/confirmar/<token>")
-# def confirmarEmail(token):
-#     try:
-#         email=a.loads(token, salt='emcof', max_age=60)
-#         cur = mysql.connection.cursor()
-#         cur.execute("UPDATE users SET estado='1' WHERE email='"+email+"'")
-#         cur.close()
-#     except SignatureExpired:
-#         cur = mysql.connection.cursor()
-#         cur.execute("DELETE FROM users WHERE email='"+email+"' AND estado='0'")
-#         cur.close()
-#         return "<h1>EXPIRO EL TIEMPO VUELVA A INTERNTARLO</h1>"
-#     return "<h1>"+email+"  CONFIRMADO BIENVENIDO</h1>"
 """ 
 
 if __name__ == '__main__':
